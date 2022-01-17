@@ -1,109 +1,101 @@
-import React, {useState, useEffect} from 'react';
-import Header from './components/Header';
-import Main from './components/Main';
-// import Confetti from './components/Confetti';
-// import Confetti from "react-confetti"
-import { nanoid } from 'nanoid'
-import './App.css';
+import React, {useState, useEffect} from "react";
+import Navbar from "./components/Navbar";
+import Title from "./components/Title";
+import Dice from "./components/Dice";
+import { nanoid } from 'nanoid';
 
+export default function App() {
+  const [dice, setDice] = useState(generateDiceNumber())
+  const [isWin, setIsWin] = useState(false)
+  const [count, setCount] = useState(0) 
+  const [time, setTime] = useState(0) 
 
-function App() {
-  const [dice, setDice] = useState(generateRandomDice())
-  const [tenzies, setTenzies] = useState(false)
-
-  // FUNCTION FOR COMPONENTS
-  
-  function generateNewDie() {
-    return {
-        value: Math.ceil(Math.random() * 6),
-        isHeld: false,
-        id: nanoid()
-    }
-  }
-
-  function generateRandomDice() {
+  function generateDiceNumber() {
     const newDice = []
-    for (let i = 0; i < 10; i++) {
-      newDice.push(generateNewDie())
+    for (let i=0; i < 10; i++) {
+      newDice.push({
+        id: nanoid(),
+        value: Math.ceil(Math.random() * 6),
+        isHeld: false
+      })
     }
     return newDice
-  }  
-
-  function rollDice() {
-    setDice(prev => {
-      const newDice = []
-      prev.forEach(item => {
-        item.isHeld? newDice.push(item) : newDice.push(generateNewDie())
-      })
-      return newDice
-    })
-    //  setDice(item => item.map(die => {
-    //         return die.isHeld ? 
-    //             die :
-    //             generateNewDie()
-    //     })) // other method
   }
 
-  function reset() {
-    setDice(generateRandomDice())
-    setTenzies(false)
+  function generateTimer() {
+    const date = new Date()
+    const seconds = date.getSeconds()
+    const miliSeconds = date.getMilliseconds()
+    const timer = `${seconds} : ${miliSeconds}`
+    return timer
   }
 
   function holdDice(id) {
-    setDice(prevNumbers => {
-      const newDice = []
-      prevNumbers.forEach(object => {
-        if (object.id === id) {
-          const copiedNumbers = {...object, isHeld: ! object.isHeld}
-          newDice.push(copiedNumbers) 
-        } else {
-          newDice.push({...object})
-        } 
-      }) 
-      return newDice
+    setDice(prevDice => //if put curly bracket after this, it will turn into error
+      prevDice.map(die => {
+        return die.id === id ? {...die, isHeld: !die.isHeld} :
+        die
+      })
+    )
+  }
+
+  function rollDice() {
+    setDice(prevDice => 
+      prevDice.map(die => {
+        return die.isHeld ? {...die} : {...die, value: Math.ceil(Math.random() * 6)} 
+      })
+    )
+    setCount(prevCount => {
+      return prevCount = prevCount + 1
     })
+    setTime(generateTimer())
+  }
+
+  function resetGame() {
+    setIsWin(false)
+    setCount(0)
+    setDice(generateDiceNumber())
   }
 
   useEffect(() => {
-      const allHeld = dice.every(item => item.isHeld === dice[0].isHeld)
-      const allSameValue = dice.every(item => item.value === dice[0].value)
+    const allSameValue = dice.every(die => die.value === dice[0].value)
+    const allHeld = dice.every(die => die.isHeld === dice[0].isHeld)
 
-      if (allHeld && allSameValue) {
-        setTenzies(true)
-        console.log("you won")
-      }
+    setIsWin(allSameValue && allHeld ? true : false)
+
   }, [dice])
-  
+
   const diceElements = dice.map(die => {
-  return (
-    <Main
-      key={die.id}
-      id={die.id}
-      dieValue={die.value}
-      isHeld={die.isHeld}
-      holdDice={holdDice}
-    />
+    return (
+      <Dice 
+        key={die.id}
+        value={die.value}
+        isHeld={die.isHeld}
+        change={() => holdDice(die.id)}
+        roll={rollDice}
+      />
     )
   })
-  
-
-  //COMPONENTS
-
+  // *********** APP COMPONENT ***************
   return (
-    <div className="container border-8 border-black p-8 m-4 grid place-items-center">
-      {/* {tenzies && <Confetti />} */}
-      <Header />
-      <div className="card-container mt-8 grid grid-cols-5 gap-4">
-        {diceElements}
-      </div>
-      <button 
-        className="mt-12 text-white bg-blue-600 te font-semibold py-1 px-4 rounded-md"
-        onClick= {tenzies? reset : rollDice} 
-      >
-        {tenzies? "New Game" : "Roll"}  
-      </button>
+    <div>
+      <Navbar
+        count={count}
+        timer={time}
+      />
+      <main className="grid place-items-center ">
+        <Title />
+        <section 
+          className="dice-container mt-14 grid grid-cols-5 place-items-center gap-4">
+          {diceElements}
+        </section>
+        <button 
+          className="bg-violet-500 text-white px-6 py-2 mt-12"
+          onClick={isWin ? resetGame : rollDice}
+          >
+          {isWin ? "Play Again" : "Roll"}
+        </button>
+      </main>
     </div>
   )
 }
-
-export default App
