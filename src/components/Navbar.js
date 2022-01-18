@@ -13,7 +13,7 @@ export default function Navbar(props) {
             <div className="time grid place-items-center">
                 <h4 className="text-white font-semibold">Time</h4>
                 <div className="w-8 h-5 bg-white">
-                    
+                   
                 </div>
             </div>
         </nav>

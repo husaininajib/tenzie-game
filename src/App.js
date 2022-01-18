@@ -8,7 +8,6 @@ export default function App() {
   const [dice, setDice] = useState(generateDiceNumber())
   const [isWin, setIsWin] = useState(false)
   const [count, setCount] = useState(0) 
-  const [time, setTime] = useState(0) 
 
   function generateDiceNumber() {
     const newDice = []
@@ -20,14 +19,6 @@ export default function App() {
       })
     }
     return newDice
-  }
-
-  function generateTimer() {
-    const date = new Date()
-    const seconds = date.getSeconds()
-    const miliSeconds = date.getMilliseconds()
-    const timer = `${seconds} : ${miliSeconds}`
-    return timer
   }
 
   function holdDice(id) {
@@ -48,7 +39,6 @@ export default function App() {
     setCount(prevCount => {
       return prevCount = prevCount + 1
     })
-    setTime(generateTimer())
   }
 
   function resetGame() {
@@ -81,7 +71,6 @@ export default function App() {
     <div>
       <Navbar
         count={count}
-        timer={time}
       />
       <main className="grid place-items-center ">
         <Title />
